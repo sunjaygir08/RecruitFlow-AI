@@ -347,6 +347,26 @@ Variable **names** only — never commit real values. All integration keys are o
 
 ---
 
+## 🚀 Vercel Deployment
+
+This project is prepared for a frontend-only deployment on Vercel using the free Hobby plan.
+
+### What is deployed
+- The Next.js frontend is deployed from the frontend folder.
+- API calls are disabled gracefully by default in production so the UI remains usable even when no backend is connected.
+
+### Vercel settings
+Set these environment variables in Vercel:
+
+- `NEXT_PUBLIC_API_URL=/api/v1`
+- `NEXT_PUBLIC_API_DISABLED=true`
+
+### Notes
+- Railway, Docker, Kubernetes, and Render-specific deployment files were removed to keep the setup simple and Vercel-focused.
+- No localhost URLs are used in the production frontend configuration.
+
+---
+
 ## Screenshots
 
 | View | Preview |
