@@ -1,0 +1,24 @@
+Alex Morgan
+Senior Full Stack Engineer
+Email: alex.morgan@example.com | Phone: (555) 019-2834 | San Francisco, CA
+
+SUMMARY
+Passionate Full Stack Engineer with 7+ years of experience designing and scaling web applications using React, Python Flask, Node.js, and Cloud Infrastructure. Proven track record of leading high-performance engineering teams and integrating generative AI tools.
+
+SKILLS
+Frontend: React, TypeScript, Tailwind CSS, Vite, Redux, Recharts
+Backend: Python, Flask, Django, Node.js, REST APIs, GraphQL
+Database: PostgreSQL, MongoDB, Redis, Airtable API
+AI/Automation: OpenAI API, Google Gemini API, LangChain, n8n, Webhooks
+DevOps: Docker, AWS, CI/CD Pipelines, Git
+
+EXPERIENCE
+Lead Software Engineer | TechFlow Inc. (2022 - Present)
+- Architected enterprise React/Flask microservices handling 10M+ daily API requests.
+- Integrated AI-driven document parser reducing processing time by 60%.
+
+Senior Full Stack Developer | CloudScale Solutions (2019 - 2022)
+- Built dynamic dashboard with Recharts and Tailwind CSS for real-time analytics.
+
+EDUCATION
+B.S. in Computer Science | Stanford University (2015 - 2019)

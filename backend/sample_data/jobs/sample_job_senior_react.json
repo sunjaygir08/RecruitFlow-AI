@@ -1,0 +1,11 @@
+{
+  "id": "job_001",
+  "title": "Senior React Frontend Developer",
+  "department": "Engineering",
+  "location": "San Francisco, CA (Hybrid)",
+  "type": "Full-time",
+  "status": "Active",
+  "required_skills": ["React", "JavaScript", "Tailwind CSS", "Vite", "REST APIs"],
+  "experience_level": "5+ years",
+  "description": "We are seeking a Senior React Developer to lead the frontend development of our AI-driven recruitment platform. Experience with Tailwind CSS, state management, and API integration is essential."
+}

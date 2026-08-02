@@ -1,0 +1,29 @@
+{
+  "name": "recruitflow-ai",
+  "version": "1.0.0",
+  "description": "Production-ready AI-powered recruitment and candidate matching platform using React, Flask, Gemini, Airtable, and n8n",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "python backend/run.py",
+    "install:all": "npm install && npm --prefix frontend install",
+    "build:frontend": "npm --prefix frontend run build",
+    "test:backend": "pytest backend/tests",
+    "test:frontend": "npm --prefix frontend run test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "recruitment",
+    "ai",
+    "gemini",
+    "flask",
+    "react",
+    "airtable",
+    "n8n"
+  ],
+  "author": "RecruitFlow AI Team",
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "job_002",
+  "title": "Lead Python & AI Engineer",
+  "department": "AI & Infrastructure",
+  "location": "Remote",
+  "type": "Full-time",
+  "status": "Active",
+  "required_skills": ["Python", "Flask", "Google Gemini API", "LLMs", "PyAirtable", "Docker"],
+  "experience_level": "7+ years",
+  "description": "Looking for a Lead Backend & AI Engineer to build scalable Python Flask REST services, integrate Google Gemini LLM pipelines, and design automated candidate matching algorithms."
+}

@@ -1,0 +1,385 @@
+{
+  "name": "RecruitFlow AI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Resume Upload\nReceives the application payload via the Webhook and uploads the resume to the Flask backend (POST /resume/upload). Retry On Fail is enabled to survive transient backend restarts inside Docker.",
+        "height": 300,
+        "width": 320,
+        "color": 4
+      },
+      "id": "note-resume-upload",
+      "name": "Note - Resume Upload",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-160, -200]
+    },
+    {
+      "parameters": {
+        "content": "## AI Scoring\nSends the parsed resume to POST /candidates/score where Google Gemini evaluates the candidate and returns a numeric score.",
+        "height": 300,
+        "width": 260,
+        "color": 5
+      },
+      "id": "note-ai-scoring",
+      "name": "Note - AI Scoring",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, -200]
+    },
+    {
+      "parameters": {
+        "content": "## Job Matching\nPOST /jobs/match compares the scored candidate against open roles and returns match_percentage. The IF node routes on the 75% threshold.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "note-job-matching",
+      "name": "Note - Job Matching",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [500, -200]
+    },
+    {
+      "parameters": {
+        "content": "## Interview Scheduling\nWhen match_percentage >= 75 the candidate is scheduled (POST /interviews/schedule), a Google Calendar event is created, and a Resend confirmation email is sent.",
+        "height": 320,
+        "width": 900,
+        "color": 2
+      },
+      "id": "note-interview",
+      "name": "Note - Interview Scheduling",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [840, -560]
+    },
+    {
+      "parameters": {
+        "content": "## Error Handling\nAll HTTP Request nodes use Retry On Fail (3 tries, 2s wait) so temporary Flask/network failures inside Docker are retried automatically. Both branches Merge into a single Respond to Webhook so the caller always receives one clean response.",
+        "height": 320,
+        "width": 700,
+        "color": 1
+      },
+      "id": "note-error-handling",
+      "name": "Note - Error Handling",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [840, 280]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "recruitflow-ai",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-100, 60],
+      "webhookId": "recruitflow-ai-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "a1", "name": "candidate_id", "value": "={{ $json.body.candidate_id }}", "type": "string" },
+            { "id": "a2", "name": "job_id", "value": "={{ $json.body.job_id }}", "type": "string" },
+            { "id": "a3", "name": "resume_url", "value": "={{ $json.body.resume_url }}", "type": "string" },
+            { "id": "a4", "name": "candidate_name", "value": "={{ $json.body.candidate_name }}", "type": "string" },
+            { "id": "a5", "name": "candidate_email", "value": "={{ $json.body.candidate_email }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-input",
+      "name": "Prepare Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [120, 60]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/api/v1/resume/upload",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ candidate_id: $json.candidate_id, resume_url: $json.resume_url }) }}",
+        "options": {}
+      },
+      "id": "upload-resume",
+      "name": "Upload Resume",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [340, 60],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/api/v1/candidates/score",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ candidate_id: $('Prepare Input').item.json.candidate_id, resume_data: $json }) }}",
+        "options": {}
+      },
+      "id": "score-candidate",
+      "name": "Score Candidate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [560, 60],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/api/v1/jobs/match",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ candidate_id: $('Prepare Input').item.json.candidate_id, job_id: $('Prepare Input').item.json.job_id, score: $json.score }) }}",
+        "options": {}
+      },
+      "id": "job-matching",
+      "name": "Job Matching",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 60],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.match_percentage }}",
+              "rightValue": 75,
+              "operator": { "type": "number", "operation": "gte" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-match",
+      "name": "IF match_percentage >= 75",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1000, 60]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/api/v1/interviews/schedule",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ candidate_id: $('Prepare Input').item.json.candidate_id, job_id: $('Prepare Input').item.json.job_id, match_percentage: $json.match_percentage }) }}",
+        "options": {}
+      },
+      "id": "schedule-interview",
+      "name": "Schedule Interview",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1220, -260],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": { "__rl": true, "mode": "list", "value": "primary" },
+        "start": "={{ $json.interview_start }}",
+        "end": "={{ $json.interview_end }}",
+        "additionalFields": {
+          "summary": "=Interview - {{ $('Prepare Input').item.json.candidate_name }}",
+          "description": "=Interview for {{ $('Prepare Input').item.json.candidate_name }} (Match: {{ $('IF match_percentage >= 75').item.json.match_percentage }}%)",
+          "attendees": ["={{ $('Prepare Input').item.json.candidate_email }}"]
+        }
+      },
+      "id": "google-calendar",
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1440, -260]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: 'RecruitFlow AI <recruiting@yourdomain.com>', to: [$('Prepare Input').item.json.candidate_email], subject: 'Interview Invitation - RecruitFlow AI', html: '<h2>Congratulations ' + $('Prepare Input').item.json.candidate_name + '!</h2><p>You have been shortlisted and your interview has been scheduled. Please check your calendar invitation for details.</p><p>Best regards,<br>The Recruiting Team</p>' }) }}",
+        "options": {}
+      },
+      "id": "resend-confirmation",
+      "name": "Resend Email (Confirmation)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, -260],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "status", "value": "success", "type": "string" },
+            { "id": "s2", "name": "decision", "value": "accepted", "type": "string" },
+            { "id": "s3", "name": "candidate_id", "value": "={{ $('Prepare Input').item.json.candidate_id }}", "type": "string" },
+            { "id": "s4", "name": "match_percentage", "value": "={{ $('IF match_percentage >= 75').item.json.match_percentage }}", "type": "number" },
+            { "id": "s5", "name": "message", "value": "Interview scheduled and confirmation email sent.", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-accepted-result",
+      "name": "Build Accepted Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1880, -260]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/api/v1/candidates/score",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ candidate_id: $('Prepare Input').item.json.candidate_id, status: 'Rejected', match_percentage: $json.match_percentage }) }}",
+        "options": {}
+      },
+      "id": "update-status-rejected",
+      "name": "Update Candidate Status = Rejected",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1220, 620],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: 'RecruitFlow AI <recruiting@yourdomain.com>', to: [$('Prepare Input').item.json.candidate_email], subject: 'Application Update - RecruitFlow AI', html: '<p>Dear ' + $('Prepare Input').item.json.candidate_name + ',</p><p>Thank you for your interest. After careful review we will not be moving forward with your application at this time. We wish you the best in your search.</p><p>Best regards,<br>The Recruiting Team</p>' }) }}",
+        "options": {}
+      },
+      "id": "resend-rejection",
+      "name": "Send Rejection Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 620],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "r1", "name": "status", "value": "success", "type": "string" },
+            { "id": "r2", "name": "decision", "value": "rejected", "type": "string" },
+            { "id": "r3", "name": "candidate_id", "value": "={{ $('Prepare Input').item.json.candidate_id }}", "type": "string" },
+            { "id": "r4", "name": "message", "value": "Candidate rejected and notification email sent.", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-rejected-result",
+      "name": "Build Rejected Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1660, 620]
+    },
+    {
+      "parameters": {
+        "numberInputs": 2
+      },
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [2120, 180]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2340, 180]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Prepare Input", "type": "main", "index": 0 }]]
+    },
+    "Prepare Input": {
+      "main": [[{ "node": "Upload Resume", "type": "main", "index": 0 }]]
+    },
+    "Upload Resume": {
+      "main": [[{ "node": "Score Candidate", "type": "main", "index": 0 }]]
+    },
+    "Score Candidate": {
+      "main": [[{ "node": "Job Matching", "type": "main", "index": 0 }]]
+    },
+    "Job Matching": {
+      "main": [[{ "node": "IF match_percentage >= 75", "type": "main", "index": 0 }]]
+    },
+    "IF match_percentage >= 75": {
+      "main": [
+        [{ "node": "Schedule Interview", "type": "main", "index": 0 }],
+        [{ "node": "Update Candidate Status = Rejected", "type": "main", "index": 0 }]
+      ]
+    },
+    "Schedule Interview": {
+      "main": [[{ "node": "Google Calendar", "type": "main", "index": 0 }]]
+    },
+    "Google Calendar": {
+      "main": [[{ "node": "Resend Email (Confirmation)", "type": "main", "index": 0 }]]
+    },
+    "Resend Email (Confirmation)": {
+      "main": [[{ "node": "Build Accepted Result", "type": "main", "index": 0 }]]
+    },
+    "Build Accepted Result": {
+      "main": [[{ "node": "Merge Results", "type": "main", "index": 0 }]]
+    },
+    "Update Candidate Status = Rejected": {
+      "main": [[{ "node": "Send Rejection Email", "type": "main", "index": 0 }]]
+    },
+    "Send Rejection Email": {
+      "main": [[{ "node": "Build Rejected Result", "type": "main", "index": 0 }]]
+    },
+    "Build Rejected Result": {
+      "main": [[{ "node": "Merge Results", "type": "main", "index": 1 }]]
+    },
+    "Merge Results": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "version": 1,
+  "meta": { "instanceId": "recruitflow-ai" },
+  "tags": [{ "name": "RecruitFlow AI" }]
+}

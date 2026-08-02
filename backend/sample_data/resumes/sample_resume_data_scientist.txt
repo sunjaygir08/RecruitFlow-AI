@@ -1,0 +1,19 @@
+Dr. Elena Rostova
+Data Scientist & AI Specialist
+Email: elena.rostova@example.com | Phone: (555) 948-1029 | New York, NY
+
+SUMMARY
+Data Scientist with 5+ years of experience in Machine Learning, Natural Language Processing (NLP), and LLM fine-tuning. Expertise in Python, PyTorch, Scikit-learn, and vector databases.
+
+SKILLS
+Python, PyTorch, TensorFlow, Scikit-Learn, Pandas, NumPy, Google Gemini API, LangChain, PostgreSQL, Vector DBs (Pinecone, Chroma), Flask.
+
+EXPERIENCE
+Staff Data Scientist | AI Innovations Lab (2021 - Present)
+- Developed NLP candidate scoring algorithms with 92% accuracy compared to human recruiters.
+
+Data Analyst | DataCorp (2018 - 2021)
+- Built predictive models for employee retention and talent acquisition analytics.
+
+EDUCATION
+Ph.D. in Data Science | Columbia University (2018)
