@@ -395,15 +395,14 @@ Tests cover the API routes and the utility helpers. Because the backend degrades
 
 ## 👤 Author
 
-**Developed by Sanjay Gir**
-Computer Systems Engineering Student
-Dawood University of Engineering & Technology
+**Developed by Sunjay Gir**
+AI Chatbot Intern At Bandive Media Solution
 
 ---
 
 <div align="center">
 
-**BranDive Media Solutions — Weekly AI Development Sprint — Project 2**
+**BranDive Media Solutions — Weekly AI Development Sprint — Project 1**
 RecruitFlow AI™ · Built for the TalentBridge Recruitment case study
 
 </div>
