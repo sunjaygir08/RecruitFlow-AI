@@ -1,7 +1,7 @@
 /**
  * RecruitFlow AI — API Service
  * Central file for all Flask backend API calls.
- * Uses a relative API base by default so the same frontend works locally and in Vercel.
+ * Uses the deployed API path by default so production routing is automatic.
  */
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api/v1').replace(/\/$/, '');

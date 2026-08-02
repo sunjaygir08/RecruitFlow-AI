@@ -17,7 +17,7 @@ export async function DELETE(request, { params }) {
 }
 
 async function proxyToBackend(request, pathSegments = []) {
-  const backendBaseUrl = process.env.BACKEND_API_URL || 'http://localhost:5000';
+  const backendBaseUrl = process.env.BACKEND_API_URL || 'https://your-backend-url.example.com';
   const path = Array.isArray(pathSegments) ? pathSegments.join('/') : pathSegments;
   const url = new URL(`${backendBaseUrl}/api/${path}${request.nextUrl.search}`);
 
