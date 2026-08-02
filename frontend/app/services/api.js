@@ -1,10 +1,10 @@
 /**
  * RecruitFlow AI — API Service
  * Central file for all Flask backend API calls.
- * Backend runs at http://localhost:5000/api/v1
+ * Uses a relative API base by default so the same frontend works locally and in Vercel.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api/v1').replace(/\/$/, '');
 
 // Generic request helper
 async function request(path, options = {}) {
